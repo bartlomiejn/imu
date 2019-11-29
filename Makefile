@@ -3,6 +3,7 @@ ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 HOST_PLAT ?= macos
 TOOLS_DIR ?= $(ROOT_DIR)/tools
 OUTPUT_DIR ?= $(ROOT_DIR)/output
+PROFILE ?= debug
 
 ifeq ($(HOST_PLAT), x86_64)
 TARGET_PLAT := arm-eabi
@@ -18,11 +19,12 @@ endif
 
 CROSS_GCC_DIR := $(TOOLS_DIR)/$(TARGET_PLAT)
 CROSS_GCC := $(CROSS_GCC_DIR)/bin/$(TARGET_PLAT)-gcc
+CROSS_GDB := $(CROSS_GCC_DIR)/bin/$(TARGET_PLAT)-gdb
 
 OPENOCD_DIR := $(TOOLS_DIR)/openocd
 OPENOCD_VER := v0.10.0
+OPENOCD_CFG := $(OPENOCD_DIR)/tcl/board/stm32f3discovery.cfg
 OPENOCD := $(OPENOCD_DIR)/src/openocd
-OPENOCD_CFG := $(ROOT_DIR)/debug/stm32f3disco.cfg
 
 INCLUDE := $(ROOT_DIR)/include
 SRC_DIR := $(ROOT_DIR)/src
@@ -92,6 +94,10 @@ GCC_SOURCES := \
 	$(ST_SOURCES) \
 	$(SOURCES)
 
+ifeq ($(PROFILE),debug)
+GCC_INCLUDES += -g
+endif
+
 $(OUTPUT_DIR):
 	mkdir -pv $@
 
@@ -118,9 +124,10 @@ openocd:
 binary: $(OUTPUT_DIR)/disco.bin
 
 run_openocd:
-	$(OPENOCD) \
-		--file $(OPENOCD_DIR)/tcl/board/stm32f3discovery.cfg \
-		--search $(OPENOCD_DIR)/tcl
+	$(OPENOCD) --file $(OPENOCD_CFG) --search $(OPENOCD_DIR)/tcl
+
+run_debug:
+	$(CROSS_GDB) $(OUTPUT_DIR)/disco.bin
 
 clean:
 	rm -rf toolchain
