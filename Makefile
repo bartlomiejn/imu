@@ -20,6 +20,9 @@ CROSS_GCC_DIR := $(TOOLS_DIR)/$(TARGET_PLAT)
 CROSS_GCC := $(CROSS_GCC_DIR)/bin/$(TARGET_PLAT)-gcc
 
 OPENOCD_DIR := $(TOOLS_DIR)/openocd
+OPENOCD_VER := v0.10.0
+OPENOCD := $(OPENOCD_DIR)/src/openocd
+OPENOCD_CFG := $(ROOT_DIR)/debug/stm32f3disco.cfg
 
 INCLUDE := $(ROOT_DIR)/include
 SRC_DIR := $(ROOT_DIR)/src
@@ -106,13 +109,16 @@ toolchain: $(TOOLS_DIR)
 openocd:
 	if [ ! -d "$(OPENOCD_DIR)" ]; then \
 		git clone \
-			--branch v0.9.0 \
+			--branch $(OPENOCD_VER) \
 			https://git.code.sf.net/p/openocd/code \
 			$(OPENOCD_DIR); \
 	fi
-	cd $(OPENOCD_DIR) && ./bootstrap && ./configure --enable-jlink && make
+	cd $(OPENOCD_DIR) && ./bootstrap && ./configure --enable-jlink && $(MAKE)
 
 binary: $(OUTPUT_DIR)/disco.bin
+
+debug:
+	$(OPENOCD) --file $(OPENOCD_CFG)
 
 clean:
 	rm -rf toolchain
