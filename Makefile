@@ -117,7 +117,7 @@ openocd:
 
 binary: $(OUTPUT_DIR)/disco.bin
 
-debug:
+debugrrr:
 	$(OPENOCD) --file $(OPENOCD_CFG)
 
 clean:
