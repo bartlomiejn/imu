@@ -1,23 +1,25 @@
 ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 HOST_PLAT ?= macos
-TOOLCHAIN_DIR ?= $(ROOT_DIR)/toolchain
+TOOLS_DIR ?= $(ROOT_DIR)/tools
 OUTPUT_DIR ?= $(ROOT_DIR)/output
 
 ifeq ($(HOST_PLAT), x86_64)
 TARGET_PLAT := arm-eabi
 CROSS_GCC_NAME := gcc-linaro-7.4.1-2019.02-x86_64_$(TARGET_PLAT).tar.xz
 CROSS_GCC_URL := https://releases.linaro.org/components/toolchain/binaries/latest-7/$(TARGET_PLAT)/$(CROSS_GCC_NAME)
-CROSS_GCC_TAR := $(TOOLCHAIN_DIR)/$(CROSS_GCC_NAME)
+CROSS_GCC_TAR := $(TOOLS_DIR)/$(CROSS_GCC_NAME)
 else ifeq ($(HOST_PLAT), macos)
 TARGET_PLAT := arm-none-eabi
 CROSS_GCC_NAME := gcc-$(TARGET_PLAT)-9-2019-q4-major-mac.tar.bz2
 CROSS_GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/RC2.1/$(CROSS_GCC_NAME)
-CROSS_GCC_TAR := $(TOOLCHAIN_DIR)/$(CROSS_GCC_NAME)
+CROSS_GCC_TAR := $(TOOLS_DIR)/$(CROSS_GCC_NAME)
 endif
 
-CROSS_GCC_DIR := $(TOOLCHAIN_DIR)/$(TARGET_PLAT)
+CROSS_GCC_DIR := $(TOOLS_DIR)/$(TARGET_PLAT)
 CROSS_GCC := $(CROSS_GCC_DIR)/bin/$(TARGET_PLAT)-gcc
+
+OPENOCD_DIR := $(TOOLS_DIR)/openocd
 
 INCLUDE := $(ROOT_DIR)/include
 SRC_DIR := $(ROOT_DIR)/src
@@ -90,16 +92,25 @@ GCC_SOURCES := \
 $(OUTPUT_DIR):
 	mkdir -pv $@
 
-$(TOOLCHAIN_DIR):
+$(TOOLS_DIR):
 	mkdir -pv $@
 
 $(OUTPUT_DIR)/disco.bin: $(OUTPUT_DIR)
 	$(CROSS_GCC) $(GCC_OPTS) $(GCC_INCLUDES) $(GCC_SOURCES)
 
-get_toolchain: $(TOOLCHAIN_DIR)
-	wget $(CROSS_GCC_URL) -P $(TOOLCHAIN_DIR)
+toolchain: $(TOOLS_DIR)
+	wget $(CROSS_GCC_URL) -P $(TOOLS_DIR)
 	mkdir -pv $(CROSS_GCC_DIR)
 	tar -xf $(CROSS_GCC_TAR) -C $(CROSS_GCC_DIR) --strip 1
+	
+openocd:
+	if [ ! -d "$(OPENOCD_DIR)" ]; then \
+		git clone \
+			--branch v0.9.0 \
+			https://git.code.sf.net/p/openocd/code \
+			$(OPENOCD_DIR); \
+	fi
+	cd $(OPENOCD_DIR) && ./bootstrap && ./configure --enable-jlink && make
 
 binary: $(OUTPUT_DIR)/disco.bin
 
