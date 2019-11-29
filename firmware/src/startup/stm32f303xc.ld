@@ -23,24 +23,19 @@ MEMORY
 	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 40K
 }
 
-/* Enforce emission of the vector table. */
 EXTERN(g_pfnVectors)
-
-/* Define the entry point of the output file. */
 ENTRY(Reset_Handler)
 
 SECTIONS
 {
 	.text : {
-		*(.vectors)	/* Vector table */
-		*(.text*)	/* Program code */
+		*(.vectors)
+		*(.text*)
 		. = ALIGN(4);
-		*(.rodata*)	/* Read-only data */
+		*(.rodata*)
 		. = ALIGN(4);
 	} >rom
 
-	/* C++ Static constructors/destructors, also used for __attribute__
-	 * ((constructor)) and the likes */
 	.preinit_array : {
 		. = ALIGN(4);
 		__preinit_array_start = .;
@@ -76,7 +71,7 @@ SECTIONS
 
 	.data : {
 		_sdata = .;
-		*(.data*)	/* Read-write initialized data */
+		*(.data*)
 		. = ALIGN(4);
 		_edata = .;
 	} >ram AT >rom
@@ -86,7 +81,7 @@ SECTIONS
 	.bss : {
 		_sbss = .;
 		__bss_start__ = _sbss;
-		*(.bss*)	/* Read-write zero initialized data */
+		*(.bss*)
 		*(COMMON)
 		. = ALIGN(4);
 		_ebss = .;

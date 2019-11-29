@@ -1,10 +1,19 @@
 # imu
 
-Written for the `STM32F3Discovery` board. 
+`firmware` - Firmware for an `STM32F3Discovery` board
 
-## Build and run
+`client` - Host software.
 
-1. Resolve all of the dependencies first: `make toolchain && make openocd`. 
-Set `HOST_PLAT={macos,x86_64}` for your host machine platform (default: `macos`)
+## Firmware
 
-2. Build: `make binary`
+- Make the dependencies first: `make toolchain && make openocd`.
+
+- Variables to set before build: 
+	- `HOST_PLAT={macos,x86_64}` (default: `macos`)
+	- `PROFILE={debug,release}` (default: `debug`)
+
+- Build: `make binary`
+
+## Client
+
+TBD

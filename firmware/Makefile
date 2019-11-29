@@ -126,8 +126,13 @@ binary: $(OUTPUT_DIR)/disco.bin
 run_openocd:
 	$(OPENOCD) --file $(OPENOCD_CFG) --search $(OPENOCD_DIR)/tcl
 
-run_debug:
-	$(CROSS_GDB) $(OUTPUT_DIR)/disco.bin
+load:
+	$(CROSS_GDB) \
+		--eval-command="target remote :3333" \
+		--eval-command="monitor reset" \
+		--eval-command="target remote :3333" \
+		--eval-command="load" \
+		$(OUTPUT_DIR)/disco.bin
 
 clean:
 	rm -rf toolchain
