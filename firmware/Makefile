@@ -68,7 +68,10 @@ BSP_SOURCES := \
 	$(BSP_SRC_DIR)/stm32f3_discovery_accelerometer.c \
 	$(BSP_SRC_DIR)/stm32f3_discovery_gyroscope.c
 
-SOURCES := $(SRC_DIR)/startup/stm32f303xc.s $(SRC_DIR)/main.c
+SOURCES := \
+	$(SRC_DIR)/startup/stm32f303xc.s \
+	$(SRC_DIR)/main.c
+	$(SRC_DIR)/isr.c
 
 GCC_OPTS := \
 	-o $(OUTPUT_BIN) \
