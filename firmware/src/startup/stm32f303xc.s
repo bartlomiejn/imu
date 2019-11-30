@@ -44,22 +44,18 @@
 	.fpu softvfp
 	.thumb
 
-.global	g_pfnVectors
+.global	isr_vector
 .global	Default_Handler
 
-/* start address for the initialization values of the .data section.
-defined in linker script */
+/* Start address for the initialization values of the .data section. */
 .word	_sidata
-/* start address for the .data section. defined in linker script */
 .word	_sdata
-/* end address for the .data section. defined in linker script */
 .word	_edata
-/* start address for the .bss section. defined in linker script */
 .word	_sbss
-/* end address for the .bss section. defined in linker script */
 .word	_ebss
 
 .equ  BootRAM,        0xF1E0F85F
+
 /**
  * @brief  This is the code that gets called when the processor first
  *          starts execution following a reset event. Only the absolutely
@@ -68,10 +64,9 @@ defined in linker script */
  * @param  None
  * @retval : None
 */
-
-    .section	.text.Reset_Handler
-	.weak	Reset_Handler
-	.type	Reset_Handler, %function
+.section	.text.Reset_Handler
+.weak	Reset_Handler
+.type	Reset_Handler, %function
 Reset_Handler:
   ldr   sp, =_estack    /* Atollic update: set stack pointer */
 
@@ -93,7 +88,6 @@ LoopCopyDataInit:
 	bcc	CopyDataInit
 	ldr	r2, =_sbss
 	b	LoopFillZerobss
-/* Zero fill the bss segment. */
 FillZerobss:
 	movs	r3, #0
 	str	r3, [r2], #4
@@ -103,11 +97,9 @@ LoopFillZerobss:
 	cmp	r2, r3
 	bcc	FillZerobss
 
-/* Call the clock system intitialization function.*/
+/* Call the clock system intitialization function. */
     bl  SystemInit
-/* Call static constructors */
     bl __libc_init_array
-/* Call the application's entry point.*/
 	bl	main
 
 LoopForever:
@@ -123,12 +115,13 @@ LoopForever:
  * @param  None
  * @retval : None
 */
-    .section	.text.Default_Handler,"ax",%progbits
+.section	.text.Default_Handler,"ax",%progbits
 _exit:
 Default_Handler:
 Infinite_Loop:
 	b	Infinite_Loop
 	.size	Default_Handler, .-Default_Handler
+
 /******************************************************************************
 *
 * The minimal vector table for a Cortex-M4.  Note that the proper constructs
@@ -136,12 +129,10 @@ Infinite_Loop:
 * 0x0000.0000.
 *
 ***************************************************************************** */
- 	.section	.isr_vector,"a",%progbits
-	.type	g_pfnVectors, %object
-	.size	g_pfnVectors, .-g_pfnVectors
-
-
-g_pfnVectors:
+.section	.isr_vector,"a",%progbits
+.type	isr_vector, %object
+.size	isr_vector, .-isr_vector
+isr_vector:
 	.word	_estack
 	.word	Reset_Handler
 	.word	NMI_Handler
