@@ -80,6 +80,7 @@ LoopCopyDataInit:
 	bcc	CopyDataInit
 	ldr	r2, =_sbss
 	b	LoopFillZerobss
+
 FillZerobss:
 	movs	r3, #0
 	str	r3, [r2], #4
