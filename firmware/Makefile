@@ -70,8 +70,9 @@ BSP_SOURCES := \
 
 SOURCES := \
 	$(SRC_DIR)/startup/stm32f303xc.s \
-	$(SRC_DIR)/main.c
-	$(SRC_DIR)/isr.c
+	$(SRC_DIR)/main.c \
+	$(SRC_DIR)/isr.c \
+	$(SRC_DIR)/int.c
 
 GCC_OPTS := \
 	-o $(OUTPUT_BIN) \
@@ -99,7 +100,7 @@ GCC_SOURCES := \
 	$(SOURCES)
 
 ifeq ($(PROFILE),debug)
-GCC_INCLUDES += -g
+GCC_OPTS += -g
 endif
 
 $(OUTPUT_DIR):

@@ -99,7 +99,6 @@ LoopForever:
     b LoopForever
     
 .size Reset_Handler, .-Reset_Handler
-
 .section .text.Default_Handler,"ax",%progbits
 _exit:
 Default_Handler:
