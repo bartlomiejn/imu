@@ -3,6 +3,7 @@ ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 HOST_PLAT ?= macos
 TOOLS_DIR ?= $(ROOT_DIR)/tools
 OUTPUT_DIR ?= $(ROOT_DIR)/output
+OUTPUT_BIN ?= $(OUTPUT_DIR)/stm32f3disco.bin
 PROFILE ?= debug
 
 ifeq ($(HOST_PLAT), x86_64)
@@ -70,7 +71,7 @@ BSP_SOURCES := \
 SOURCES := $(SRC_DIR)/startup/stm32f303xc.s $(SRC_DIR)/main.c
 
 GCC_OPTS := \
-	-o $(OUTPUT_DIR)/disco.bin \
+	-o $(OUTPUT_BIN) \
 	-mcpu=cortex-m4 -march=armv7e-m \
 	-mfloat-abi=hard -mfpu=fpv4-sp-d16 \
 	-ffreestanding -flto \
@@ -104,7 +105,7 @@ $(OUTPUT_DIR):
 $(TOOLS_DIR):
 	mkdir -pv $@
 
-$(OUTPUT_DIR)/disco.bin: $(OUTPUT_DIR)
+$(OUTPUT_BIN): $(OUTPUT_DIR)
 	$(CROSS_GCC) $(GCC_OPTS) $(GCC_INCLUDES) $(GCC_SOURCES)
 
 toolchain: $(TOOLS_DIR)
@@ -121,7 +122,7 @@ openocd:
 	fi
 	cd $(OPENOCD_DIR) && ./bootstrap && ./configure --enable-jlink && $(MAKE)
 
-binary: $(OUTPUT_DIR)/disco.bin
+binary: $(OUTPUT_BIN)
 
 run_openocd:
 	$(OPENOCD) --file $(OPENOCD_CFG) --search $(OPENOCD_DIR)/tcl
@@ -132,7 +133,12 @@ load:
 		--eval-command="monitor reset" \
 		--eval-command="target remote :3333" \
 		--eval-command="load" \
-		$(OUTPUT_DIR)/disco.bin
+		$(OUTPUT_BIN)
 
 clean:
-	rm -rf toolchain
+	rm -rf $(OUTPUT_DIR)
+
+clean_tools:
+	rm -rf $(TOOLS_DIR)
+
+clean_all: clean clean_tools
