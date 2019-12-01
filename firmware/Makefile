@@ -71,8 +71,7 @@ BSP_SOURCES := \
 SOURCES := \
 	$(SRC_DIR)/startup/stm32f303xc.s \
 	$(SRC_DIR)/main.c \
-	$(SRC_DIR)/isr.c \
-	$(SRC_DIR)/int.c
+	$(SRC_DIR)/isr.c
 
 GCC_OPTS := \
 	-o $(OUTPUT_BIN) \
