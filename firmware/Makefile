@@ -70,8 +70,7 @@ BSP_SOURCES := \
 
 SOURCES := \
 	$(SRC_DIR)/startup/stm32f303xc.s \
-	$(SRC_DIR)/main.c \
-	$(SRC_DIR)/isr.c
+	$(SRC_DIR)/main.c
 
 GCC_OPTS := \
 	-o $(OUTPUT_BIN) \
@@ -108,9 +107,6 @@ $(OUTPUT_DIR):
 $(TOOLS_DIR):
 	mkdir -pv $@
 
-$(OUTPUT_BIN): $(OUTPUT_DIR)
-	$(CROSS_GCC) $(GCC_OPTS) $(GCC_INCLUDES) $(GCC_SOURCES)
-
 toolchain: $(TOOLS_DIR)
 	wget $(CROSS_GCC_URL) -P $(TOOLS_DIR)
 	mkdir -pv $(CROSS_GCC_DIR)
@@ -123,9 +119,10 @@ openocd:
 			https://git.code.sf.net/p/openocd/code \
 			$(OPENOCD_DIR); \
 	fi
-	cd $(OPENOCD_DIR) && ./bootstrap && ./configure --enable-jlink && $(MAKE)
+	cd $(OPENOCD_DIR) && ./bootstrap && ./configure && $(MAKE)
 
-binary: $(OUTPUT_BIN)
+binary: $(OUTPUT_DIR)
+	$(CROSS_GCC) $(GCC_OPTS) $(GCC_INCLUDES) $(GCC_SOURCES)
 
 run_openocd:
 	$(OPENOCD) --file $(OPENOCD_CFG) --search $(OPENOCD_DIR)/tcl

@@ -52,6 +52,7 @@ void DebugMon_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
 void EXTI0_IRQHandler(void);
+void WWDG_IRQHandler(void);
 
 #if defined (USE_USB_INTERRUPT_DEFAULT)
 void USB_LP_CAN_RX0_IRQHandler(void);

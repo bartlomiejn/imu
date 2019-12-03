@@ -110,6 +110,7 @@ Infinite_Loop:
 .type isr_vector, %object
 .size isr_vector, .-isr_vector
 isr_vector:
+/* Cortex-M4-specific */
 .word	_estack
 .word	Reset_Handler
 .word	NMI_Handler
@@ -126,6 +127,7 @@ isr_vector:
 .word	0
 .word	PendSV_Handler
 .word	SysTick_Handler
+/* STM-specific */
 .word	WWDG_IRQHandler
 .word	PVD_IRQHandler
 .word	TAMP_STAMP_IRQHandler
@@ -237,7 +239,6 @@ isr_vector:
 .thumb_set SysTick_Handler,Default_Handler
 
 .weak	WWDG_IRQHandler
-.thumb_set WWDG_IRQHandler,generic_int_handler
 
 .weak	PVD_IRQHandler
 .thumb_set PVD_IRQHandler,Default_Handler
