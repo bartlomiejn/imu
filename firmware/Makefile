@@ -1,6 +1,6 @@
-ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-
 PROFILE ?= debug
+STRIP_BIN ?= 1
+OPENOCD_PORT ?= 3333
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -10,14 +10,37 @@ ifeq ($(UNAME_S),Darwin)
 TARGET_PLAT := arm-none-eabi
 endif
 
+ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TOOLS_DIR := $(ROOT_DIR)/tools
 OUTPUT_DIR := $(ROOT_DIR)/output
 INCLUDE_DIR := $(ROOT_DIR)/include
 SRC_DIR := $(ROOT_DIR)/src
 OPENOCD_DIR := $(TOOLS_DIR)/openocd
-CROSS_GCC_DIR := $(TOOLS_DIR)/$(TARGET_PLAT)
+TARGET_GCC_DIR := $(TOOLS_DIR)/$(TARGET_PLAT)
+
+TARGET_PREFIX := $(TARGET_GCC_DIR)/bin/$(TARGET_PLAT)
+TARGET_GCC := $(TARGET_PREFIX)-gcc
+TARGET_GDB := $(TARGET_PREFIX)-gdb
+TARGET_OBJCOPY := $(TARGET_PREFIX)-objcopy
+TARGET_STRIP := $(TARGET_PREFIX)-strip
 
 OUTPUT_BIN := $(OUTPUT_DIR)/stm32f3disco.bin
+OUTPUT_BIN_SYMS := $(OUTPUT_DIR)/stm32f3disco.debug
+OUTPUT_BIN_STRIP := $(OUTPUT_DIR)/stm32f3disco.strip.bin
+
+GCC_OPTS := \
+	-o $(OUTPUT_BIN) \
+	-Os \
+	-mcpu=cortex-m4 -march=armv7e-m \
+	-mfloat-abi=hard -mfpu=fpv4-sp-d16 \
+	-ffreestanding \
+	--specs=nosys.specs -lnosys \
+	-fno-asynchronous-unwind-tables \
+	-T $(SRC_DIR)/startup/stm32f303xc.ld
+
+ifeq ($(PROFILE),debug)
+GCC_OPTS += -g
+endif
 
 ST_INCLUDE_DIR := $(INCLUDE_DIR)/st
 STM32_USB_LIB_DIR := $(ST_INCLUDE_DIR)/STM32_USB_Device_Library
@@ -32,13 +55,21 @@ BSP_INCLUDE := \
 	$(BSP_LIB_DIR)/Components/Common \
 	$(BSP_LIB_DIR)/Components/l3gd20 \
 	$(BSP_LIB_DIR)/Components/lsm303dlhc
+GCC_INCLUDES := \
+	-I$(INCLUDE_DIR) \
+	-I$(ST_INCLUDE_DIR) \
+	-I$(STM32_USB_INCLUDE) \
+	-I$(STM32_USB_HID_INCLUDE) \
+	-I$(CMSIS_INCLUDE) \
+	-I$(CMSIS_STM32F3_INCLUDE) \
+	-I$(HAL_INCLUDE) \
+	$(addprefix -I, $(BSP_INCLUDE))
 
 ST_SRC_DIR := $(SRC_DIR)/st
 STM32_USB_DIR := $(ST_SRC_DIR)/STM32_USB_Device_Library
 CMSIS_SRC_DIR := $(ST_SRC_DIR)/CMSIS
 HAL_SRC_DIR := $(ST_SRC_DIR)/STM32F3xx_HAL_Driver
 BSP_SRC_DIR := $(ST_SRC_DIR)/BSP
-
 ST_SOURCES := \
 	$(SRC_DIR)/selftest.c \
 	$(SRC_DIR)/stm32f3xx_it.c \
@@ -59,25 +90,6 @@ BSP_SOURCES := \
 SOURCES := \
 	$(SRC_DIR)/startup/stm32f303xc.s \
 	$(SRC_DIR)/main.c
-
-GCC_OPTS := \
-	-o $(OUTPUT_BIN) \
-	-Os -s \
-	-mcpu=cortex-m4 -march=armv7e-m \
-	-mfloat-abi=hard -mfpu=fpv4-sp-d16 \
-	-ffreestanding \
-	--specs=nosys.specs -lnosys \
-	-fno-asynchronous-unwind-tables \
-	-T $(SRC_DIR)/startup/stm32f303xc.ld
-GCC_INCLUDES := \
-	-I$(INCLUDE_DIR) \
-	-I$(ST_INCLUDE_DIR) \
-	-I$(STM32_USB_INCLUDE) \
-	-I$(STM32_USB_HID_INCLUDE) \
-	-I$(CMSIS_INCLUDE) \
-	-I$(CMSIS_STM32F3_INCLUDE) \
-	-I$(HAL_INCLUDE) \
-	$(addprefix -I, $(BSP_INCLUDE))
 GCC_SOURCES := \
 	$(STM32_USB_SOURCES) \
 	$(STM32_USB_HID_SOURCES) \
@@ -86,20 +98,12 @@ GCC_SOURCES := \
 	$(ST_SOURCES) \
 	$(SOURCES)
 
-ifeq ($(PROFILE),debug)
-GCC_OPTS += -g
-endif
-
-CROSS_GCC := $(CROSS_GCC_DIR)/bin/$(TARGET_PLAT)-gcc
-CROSS_GDB := $(CROSS_GCC_DIR)/bin/$(TARGET_PLAT)-gdb
-
-OPENOCD_PORT := 3333
-
 ROM_START := 0x8000000
 
 export UNAME_S TARGET_PLAT 
-export ROOT_DIR TOOLS_DIR CROSS_GCC_DIR OPENOCD_DIR
-export OPENOCD_PORT CROSS_GDB
+export ROOT_DIR TOOLS_DIR TARGET_GCC_DIR OPENOCD_DIR
+export OPENOCD_PORT TARGET_GDB
+export OUTPUT_BIN
 
 $(OUTPUT_DIR):
 	mkdir -pv $@
@@ -108,17 +112,21 @@ $(TOOLS_DIR):
 	mkdir -pv $@
 
 binary: $(OUTPUT_DIR)
-	$(CROSS_GCC) $(GCC_OPTS) $(GCC_INCLUDES) $(GCC_SOURCES)
-
-load:
-	$(CROSS_GDB) \
-		--eval-command="target remote :$(OPENOCD_PORT)" \
-		$(OUTPUT_BIN)
+	$(TARGET_GCC) $(GCC_OPTS) $(GCC_INCLUDES) $(GCC_SOURCES)
+ifeq ($(STRIP_BIN),1)
+	cp $(OUTPUT_BIN) $(OUTPUT_BIN_STRIP)
+	$(TARGET_OBJCOPY) --only-keep-debug $(OUTPUT_BIN_SYMS) $(OUTPUT_BIN_STRIP)
+	$(TARGET_STRIP) --strip-debug --strip-unneeded $(OUTPUT_BIN_STRIP)
+	$(TARGET_OBJCOPY) \
+		--add-gnu-debuglink=$(notdir $(OUTPUT_BIN_SYMS)) \
+		$(OUTPUT_BIN_STRIP)
+endif
 
 flash:
-	$(CROSS_GDB) \
+	$(TARGET_GDB) \
 		--eval-command="target remote :$(OPENOCD_PORT)" \
-		--eval-command="restore $(OUTPUT_BIN) binary $(ROM_START)"
+		--eval-command="restore $(OUTPUT_BIN) binary $(ROM_START)" \
+		$(OUTPUT_BIN)
 
 build/%: $(TOOLS_DIR)
 	cd $(TOOLS_DIR) && $(MAKE) $@
@@ -130,7 +138,7 @@ clean:
 	rm -rf $(OUTPUT_DIR)
 
 clean/%: 
-ifeq ($(notdir $@), "tools")
+ifeq ($(notdir $*), "tools")
 	rm -rf $(TOOLS_DIR)/*
 else
 	cd $(TOOLS_DIR) && $(MAKE) $@
