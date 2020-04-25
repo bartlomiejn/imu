@@ -98,9 +98,7 @@ GCC_SOURCES := \
 	$(SOURCES)
 
 OPENOCD := $(OPENOCD_DIR)/src/openocd
-OPENOCD_CFG := $(OPENOCD_DIR)/tcl/board/stm32f3discovery.cfg
-
-ROM_START := 0x8000000
+OPENOCD_CFG := $(TOOLS_DIR)/stm32f3discovery.cfg
 
 export UNAME_S TARGET_PLAT 
 export ROOT_DIR TOOLS_DIR TARGET_GCC_DIR OPENOCD_DIR
