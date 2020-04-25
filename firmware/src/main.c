@@ -1,7 +1,7 @@
 #include <main.h>
 
-#define KEY_PRESSED     0x00
-#define KEY_NOT_PRESSED 0x01
+#define KEY_NOT_PRESSED 0x00
+#define KEY_PRESSED     0x01
 
 __IO uint8_t
 UserButtonPressed = 0x00;

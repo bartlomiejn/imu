@@ -5,10 +5,13 @@
 ## Building
 
 `make build/toolchain`
+
 `make build/openocd`
+
 `make binary`
 
 ## Flashing
 
 `make run/openocd`
+
 `make flash`
