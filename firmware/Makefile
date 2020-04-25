@@ -61,10 +61,10 @@ SOURCES := \
 
 GCC_OPTS := \
 	-o $(OUTPUT_BIN) \
-	-Os \
+	-Os -s \
 	-mcpu=cortex-m4 -march=armv7e-m \
 	-mfloat-abi=hard -mfpu=fpv4-sp-d16 \
-	-ffreestanding -flto \
+	-ffreestanding \
 	--specs=nosys.specs -lnosys \
 	-fno-asynchronous-unwind-tables \
 	-T $(SRC_DIR)/startup/stm32f303xc.ld
