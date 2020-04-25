@@ -97,12 +97,10 @@ GCC_SOURCES := \
 	$(ST_SOURCES) \
 	$(SOURCES)
 
-OPENOCD := $(OPENOCD_DIR)/src/openocd
-OPENOCD_CFG := $(TOOLS_DIR)/stm32f3discovery.cfg
-
 export UNAME_S TARGET_PLAT 
-export ROOT_DIR TOOLS_DIR TARGET_GCC_DIR OPENOCD_DIR
-export OPENOCD_PORT TARGET_GDB
+export ROOT_DIR TOOLS_DIR
+export OPENOCD_PORT OPENOCD_DIR
+export TARGET_GCC_DIR TARGET_GDB
 export OUTPUT_BIN
 
 $(OUTPUT_DIR):
@@ -122,14 +120,7 @@ ifeq ($(STRIP_BIN),1)
 endif
 
 flash:
-	$(OPENOCD) \
-		--file $(OPENOCD_CFG) \
-		--search $(OPENOCD_DIR)/tcl \
-		-c init \
-		-c "reset init" \
-		-c "flash write_image erase $(OUTPUT_BIN)" \
-		-c reset \
-		-c shutdown
+	cd $(TOOLS_DIR) && $(MAKE) $@
 
 build/%: $(TOOLS_DIR)
 	cd $(TOOLS_DIR) && $(MAKE) $@

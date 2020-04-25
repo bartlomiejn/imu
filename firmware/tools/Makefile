@@ -8,6 +8,8 @@ TARGET_GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-201
 TARGET_GCC_TAR := $(TOOLS_DIR)/$(TARGET_GCC_NAME)
 endif
 
+OPENOCD := $(OPENOCD_DIR)/src/openocd
+OPENOCD_CFG := $(TOOLS_DIR)/stm32f3discovery.cfg
 OPENOCD_URL := https://git.code.sf.net/p/openocd/code
 OPENOCD_VER := v0.10.0
 
@@ -26,12 +28,24 @@ build/toolchain:
 	tar -xf $(TARGET_GCC_TAR) -C $(TARGET_GCC_DIR) --strip 1
 
 run/openocd:
-	$(OPENOCD) --file $(OPENOCD_CFG) --search $(OPENOCD_DIR)/tcl
+	$(OPENOCD) \
+		--file $(OPENOCD_CFG) \
+		--search $(OPENOCD_DIR)/tcl
 
 run/gdb:
 	$(TARGET_GDB) \
 		--eval-command="target extended-remote :$(OPENOCD_PORT)" \
 		$(OUTPUT_BIN)
+
+flash:
+	$(OPENOCD) \
+		--file $(OPENOCD_CFG) \
+		--search $(OPENOCD_DIR)/tcl \
+		-c init \
+		-c "reset init" \
+		-c "flash write_image erase $(OUTPUT_BIN)" \
+		-c reset \
+		-c shutdown
 
 clean/openocd:
 	rm -rf $(OPENOCD_DIR)
