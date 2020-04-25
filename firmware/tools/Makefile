@@ -1,8 +1,8 @@
-ifeq ($(HOST_PLAT), x86_64)
+ifeq ($(UNAME_S), Linux)
 CROSS_GCC_NAME := gcc-linaro-7.4.1-2019.02-x86_64_$(TARGET_PLAT).tar.xz
 CROSS_GCC_URL := https://releases.linaro.org/components/toolchain/binaries/latest-7/$(TARGET_PLAT)/$(CROSS_GCC_NAME)
 CROSS_GCC_TAR := $(TOOLS_DIR)/$(CROSS_GCC_NAME)
-else ifeq ($(HOST_PLAT), macos)
+else ifeq ($(UNAME_S), Darwin)
 CROSS_GCC_NAME := gcc-$(TARGET_PLAT)-9-2019-q4-major-mac.tar.bz2
 CROSS_GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/RC2.1/$(CROSS_GCC_NAME)
 CROSS_GCC_TAR := $(TOOLS_DIR)/$(CROSS_GCC_NAME)

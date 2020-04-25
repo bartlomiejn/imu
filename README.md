@@ -2,12 +2,13 @@
 
 `firmware` - Firmware for an `STM32F3Discovery` board
 
-## Firmware
+## Building
 
-- Make the dependencies first: `make toolchain && make openocd`.
+`make build/toolchain`
+`make build/openocd`
+`make binary`
 
-- Variables to set before build: 
-	- `HOST_PLAT={macos,x86_64}` (default: `macos`)
-	- `PROFILE={debug,release}` (default: `debug`)
+## Flashing
 
-- Build: `make binary`
+`make run/openocd`
+`make flash`

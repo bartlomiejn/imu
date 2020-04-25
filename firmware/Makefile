@@ -1,11 +1,12 @@
 ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-HOST_PLAT ?= macos
 PROFILE ?= debug
 
-ifeq ($(HOST_PLAT), x86_64)
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
 TARGET_PLAT := arm-eabi
-else ifeq ($(HOST_PLAT), macos)
+endif
+ifeq ($(UNAME_S),Darwin)
 TARGET_PLAT := arm-none-eabi
 endif
 
@@ -96,7 +97,7 @@ OPENOCD_PORT := 3333
 
 ROM_START := 0x8000000
 
-export HOST_PLAT TARGET_PLAT 
+export UNAME_S TARGET_PLAT 
 export ROOT_DIR TOOLS_DIR CROSS_GCC_DIR OPENOCD_DIR
 export OPENOCD_PORT CROSS_GDB
 
