@@ -26,7 +26,6 @@ TARGET_STRIP := $(TARGET_PREFIX)-strip
 
 OUTPUT_BIN := $(OUTPUT_DIR)/stm32f3disco.bin
 OUTPUT_BIN_SYMS := $(OUTPUT_DIR)/stm32f3disco.debug
-OUTPUT_BIN_STRIP := $(OUTPUT_DIR)/stm32f3disco.strip.bin
 
 GCC_OPTS := \
 	-o $(OUTPUT_BIN) \
@@ -114,12 +113,11 @@ $(TOOLS_DIR):
 binary: $(OUTPUT_DIR)
 	$(TARGET_GCC) $(GCC_OPTS) $(GCC_INCLUDES) $(GCC_SOURCES)
 ifeq ($(STRIP_BIN),1)
-	cp $(OUTPUT_BIN) $(OUTPUT_BIN_STRIP)
-	$(TARGET_OBJCOPY) --only-keep-debug $(OUTPUT_BIN_SYMS) $(OUTPUT_BIN_STRIP)
-	$(TARGET_STRIP) --strip-debug --strip-unneeded $(OUTPUT_BIN_STRIP)
-	$(TARGET_OBJCOPY) \
+	$(TARGET_OBJCOPY) --only-keep-debug $(OUTPUT_BIN) $(OUTPUT_BIN_SYMS) 
+	$(TARGET_STRIP) --strip-debug --strip-unneeded $(OUTPUT_BIN)
+	cd $(OUTPUT_DIR) && $(TARGET_OBJCOPY) \
 		--add-gnu-debuglink=$(notdir $(OUTPUT_BIN_SYMS)) \
-		$(OUTPUT_BIN_STRIP)
+		$(OUTPUT_BIN)
 endif
 
 flash:
