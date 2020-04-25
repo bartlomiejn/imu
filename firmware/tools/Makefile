@@ -32,7 +32,7 @@ run/openocd:
 
 run/gdb:
 	$(TARGET_GDB) \
-		--eval-command="target remote :$(OPENOCD_PORT)" \
+		--eval-command="target extended-remote :$(OPENOCD_PORT)" \
 		$(OUTPUT_BIN)
 
 clean/openocd:

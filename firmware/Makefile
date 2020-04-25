@@ -97,6 +97,9 @@ GCC_SOURCES := \
 	$(ST_SOURCES) \
 	$(SOURCES)
 
+OPENOCD := $(OPENOCD_DIR)/src/openocd
+OPENOCD_CFG := $(OPENOCD_DIR)/tcl/board/stm32f3discovery.cfg
+
 ROM_START := 0x8000000
 
 export UNAME_S TARGET_PLAT 
@@ -121,10 +124,14 @@ ifeq ($(STRIP_BIN),1)
 endif
 
 flash:
-	$(TARGET_GDB) \
-		--eval-command="target remote :$(OPENOCD_PORT)" \
-		--eval-command="restore $(OUTPUT_BIN) binary $(ROM_START)" \
-		$(OUTPUT_BIN)
+	$(OPENOCD) \
+		--file $(OPENOCD_CFG) \
+		--search $(OPENOCD_DIR)/tcl \
+		-c init \
+		-c "reset init" \
+		-c "flash write_image erase $(OUTPUT_BIN)" \
+		-c reset \
+		-c shutdown
 
 build/%: $(TOOLS_DIR)
 	cd $(TOOLS_DIR) && $(MAKE) $@
