@@ -32,6 +32,10 @@ build/toolchain:
 run/openocd:
 	$(OPENOCD) --file $(OPENOCD_CFG) --search $(OPENOCD_DIR)/tcl
 
+run/gdb:
+	$(CROSS_GDB) \
+		--eval-command="target remote :$(OPENOCD_PORT)"
+
 clean/openocd:
 	rm -rf $(OPENOCD_DIR)
 

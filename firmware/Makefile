@@ -16,9 +16,6 @@ SRC_DIR := $(ROOT_DIR)/src
 OPENOCD_DIR := $(TOOLS_DIR)/openocd
 CROSS_GCC_DIR := $(TOOLS_DIR)/$(TARGET_PLAT)
 
-CROSS_GCC := $(CROSS_GCC_DIR)/bin/$(TARGET_PLAT)-gcc
-CROSS_GDB := $(CROSS_GCC_DIR)/bin/$(TARGET_PLAT)-gdb
-
 OUTPUT_BIN := $(OUTPUT_DIR)/stm32f3disco.bin
 
 ST_INCLUDE_DIR := $(INCLUDE_DIR)/st
@@ -64,6 +61,7 @@ SOURCES := \
 
 GCC_OPTS := \
 	-o $(OUTPUT_BIN) \
+	-Os \
 	-mcpu=cortex-m4 -march=armv7e-m \
 	-mfloat-abi=hard -mfpu=fpv4-sp-d16 \
 	-ffreestanding -flto \
@@ -91,8 +89,16 @@ ifeq ($(PROFILE),debug)
 GCC_OPTS += -g
 endif
 
+CROSS_GCC := $(CROSS_GCC_DIR)/bin/$(TARGET_PLAT)-gcc
+CROSS_GDB := $(CROSS_GCC_DIR)/bin/$(TARGET_PLAT)-gdb
+
+OPENOCD_PORT := 3333
+
+ROM_START := 0x8000000
+
 export HOST_PLAT TARGET_PLAT 
 export ROOT_DIR TOOLS_DIR CROSS_GCC_DIR OPENOCD_DIR
+export OPENOCD_PORT CROSS_GDB
 
 $(OUTPUT_DIR):
 	mkdir -pv $@
@@ -105,11 +111,13 @@ binary: $(OUTPUT_DIR)
 
 load:
 	$(CROSS_GDB) \
-		--eval-command="target remote :3333" \
-		--eval-command="monitor reset" \
-		--eval-command="target remote :3333" \
-		--eval-command="load" \
+		--eval-command="target remote :$(OPENOCD_PORT)" \
 		$(OUTPUT_BIN)
+
+flash:
+	$(CROSS_GDB) \
+		--eval-command="target remote :$(OPENOCD_PORT)" \
+		--eval-command="restore $(OUTPUT_BIN) binary $(ROM_START)"
 
 build/%: $(TOOLS_DIR)
 	cd $(TOOLS_DIR) && $(MAKE) $@
