@@ -1,5 +1,4 @@
 PROFILE ?= debug
-STRIP_BIN ?= 1
 OPENOCD_PORT ?= 3333
 
 UNAME_S := $(shell uname -s)
@@ -111,15 +110,13 @@ $(TOOLS_DIR):
 
 binary: $(OUTPUT_DIR)
 	$(TARGET_GCC) $(GCC_OPTS) $(GCC_INCLUDES) $(GCC_SOURCES)
-ifeq ($(STRIP_BIN),1)
 	$(TARGET_OBJCOPY) --only-keep-debug $(OUTPUT_BIN) $(OUTPUT_BIN_SYMS) 
 	$(TARGET_STRIP) --strip-debug --strip-unneeded $(OUTPUT_BIN)
 	cd $(OUTPUT_DIR) && $(TARGET_OBJCOPY) \
 		--add-gnu-debuglink=$(notdir $(OUTPUT_BIN_SYMS)) \
 		$(OUTPUT_BIN)
-endif
 
-flash:
+flash: binary
 	cd $(TOOLS_DIR) && $(MAKE) $@
 
 build/%: $(TOOLS_DIR)
