@@ -36,7 +36,7 @@ Texture difftex(&diff, layout_rgb, filter_linear);
 Texture spectex(&spec, layout_rgb, filter_linear);
 Material mtl(&difftex, &spectex, shininess);
 
-MaterialShader mtl_shader("vertex.glsl");
+MaterialShader mtl_shader("assets/vertex.glsl", "assets/frag.glsl");
 
 Cube cubemesh(1.0f, 1.0f, 1.0f);
 std::shared_ptr<Model> cube;
@@ -152,9 +152,6 @@ main()
 		return -1;
 	}
 	glfwMakeContextCurrent(window);
-
-	// Resize window to initial size
-	glViewport(0, 0, window_width, window_height);
 	
 	// Set callbacks for mouse/keyboard input
 	glfwSetFramebufferSizeCallback(window, on_framebuffer_resize);
@@ -168,6 +165,9 @@ main()
 		glfwTerminate();
 		return -1;
 	}
+
+	// Resize window to initial size
+	glViewport(0, 0, window_width, window_height);
 	
 	std::cout << "OpenGL version: " << (char*)glGetString(GL_VERSION)
 		  << std::endl;

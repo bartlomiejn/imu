@@ -24,7 +24,7 @@ Shader::try_create_and_link(void)
 {
 	// Load, compile and error check the vertex shader
 	FileLoader vert_loader(vert_filename);
-	std::string vert_shader_src = vert_loader.read();
+	std::string vert_shader_src = vert_loader.try_read();
 	const char *vert_shader_csrc = vert_shader_src.c_str();
 	unsigned int vert_shader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vert_shader, 1, &vert_shader_csrc, nullptr);
@@ -41,7 +41,7 @@ Shader::try_create_and_link(void)
 	
 	// Load, compile and error check the fragment shader
 	FileLoader frag_loader(frag_filename);
-	std::string frag_shader_src = frag_loader.read();
+	std::string frag_shader_src = frag_loader.try_read();
 	const char *frag_shader_csrc = frag_shader_src.c_str();
 	unsigned int frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(frag_shader, 1, &frag_shader_csrc, nullptr);
@@ -75,10 +75,6 @@ Shader::try_create_and_link(void)
 	// Delete them once linked
 	glDeleteShader(vert_shader);
 	glDeleteShader(frag_shader);
-	
-	set_uniform("is_dir_light", 0);
-	set_uniform("pt_light_count", 0);
-	set_uniform("spot_light_count", 0);
 	
 	id = program;
 }
@@ -121,8 +117,8 @@ Shader::get_uniform_location(const char *uniform) const
 	return glGetUniformLocation(id, uniform);
 }
 
-MaterialShader::MaterialShader(const char* vert_filename):
-	Shader(vert_filename, "glsl/material.glsl")
+MaterialShader::MaterialShader() : 
+	Shader("assets/vert.glsl", "assets/frag.glsl")
 {};
 
 void
@@ -132,5 +128,4 @@ MaterialShader::set_dir_light(DirectionalLight& light)
 	set_uniform("dir_light.ambient", light.ambient);
 	set_uniform("dir_light.diffuse", light.diffuse);
 	set_uniform("dir_light.specular", light.specular);
-	set_uniform("is_dir_light", 1);
 }

@@ -49,7 +49,7 @@ private:
 class MaterialShader: public Shader
 {
 public:
-	explicit MaterialShader(const char* vert_filename);
+	explicit MaterialShader();
 	void set_dir_light(DirectionalLight& light);
 };
 

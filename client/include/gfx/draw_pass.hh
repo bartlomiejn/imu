@@ -38,14 +38,32 @@ public:
 		height(height)
 	{}
 	
-	/// Draws a depth map for provided models.
-	///
-	/// \tparam Container Container type
-	/// \param models Container of `std::reference_wrapper` of `Model`s
 	template <typename Container> void
 	draw(Container models)
 	{
-		glViewport(0, 0, width, height);
+        draw_setup();
+
+		DrawObjectsContext ctx = generate_context();
+		
+		for (const auto &model : models)
+			model->draw(ctx);
+	}
+
+    void
+    draw(std::shared_ptr<Model> model)
+    {
+        draw_setup();
+
+        DrawObjectsContext ctx = generate_context();
+
+        model->draw(ctx);
+    }
+
+private:
+    void
+    draw_setup()
+    {
+        glViewport(0, 0, width, height);
 		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		
@@ -55,8 +73,12 @@ public:
 		glClear(GL_DEPTH_BUFFER_BIT);
 		
 		glEnable(GL_DEPTH_TEST);
-		
-		// Generate view matrix
+    }
+
+    DrawObjectsContext
+    generate_context()
+    {
+        // Generate view matrix
 		glm::mat4 view = camera.view_matrix();
 		
 		// Generate perspective projection
@@ -66,17 +88,14 @@ public:
 			near_plane,
 			far_plane);
 		
-		DrawObjectsContext ctx(
+        return DrawObjectsContext(
 			view,
 			projection,
 			camera.position(),
 			light,
 			0,
 			1);
-		
-		for (const auto &model : models)
-			model->draw(ctx);
-	}
+    }
 };
 
 #endif //IMU_DRAW_PASS_H

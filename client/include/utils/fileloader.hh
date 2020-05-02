@@ -7,7 +7,7 @@ class FileLoader
 {
 public:
 	explicit FileLoader(std::string &&name);
-	std::string read();
+	std::string try_read();
 private:
 	std::string filename;
 };
