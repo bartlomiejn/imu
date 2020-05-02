@@ -21,21 +21,7 @@ struct PeripheralDeviceError : public std::exception
 class PeripheralDevice
 {
 public:
-    PeripheralDevice()
-    {
-        int err;
-
-        err = libusb_init(&ctx);
-        if (err < 0) 
-        {
-            throw PeripheralDeviceError { 
-                "Couldn't init USB with error code" + std::to_string(err) 
-            };
-        }
-
-        libusb_set_option(
-            ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING);
-    };
+    PeripheralDevice() {};
 
     ~PeripheralDevice()
     {
@@ -45,18 +31,28 @@ public:
     void connect(
         std::function<void(std::optional<PeripheralDeviceError>)> callback
     ){
-        std::optional<PeripheralDeviceError> opt_err;
-        libusb_device_handle *dev_handle;
+        std::optional<PeripheralDeviceError> opt_err = std::nullopt;
         int err;
 
-        dev_handle = libusb_open_device_with_vid_pid(ctx, vid, pid);
+        err = libusb_init(&ctx);
+        if (err < 0) 
+        {
+            opt_err = PeripheralDeviceError { 
+                "Couldn't init USB with error code" + std::to_string(err) 
+            };
+            goto cleanup_callback;
+        }
 
+        libusb_set_option(
+            ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING);
+
+        dev_handle = libusb_open_device_with_vid_pid(ctx, vid, pid);
         if (!dev_handle)
         {
             opt_err = { 
                 PeripheralDeviceError { "Peripheral device is not attached. " } 
             };
-            goto cleanup;
+            goto cleanup_exit;
         }
 
         if (libusb_kernel_driver_active(dev_handle, 0))
@@ -69,7 +65,7 @@ public:
                     "Couldn't detach kernel driver with error code " 
                     + std::to_string(err)
                 } };
-                goto cleanup;
+                goto cleanup_full;
             }
 
             std::cout << "detach successful" << std::endl;
@@ -77,16 +73,38 @@ public:
 
         std::cout << "kernel driver inactive" << std::endl;
 
-cleanup:
+        err = libusb_claim_interface(dev_handle, 0);
+        if (err)
+        {
+            opt_err = { PeripheralDeviceError {
+                "Couldn't claim interface with error code " 
+                + std::to_string(err)
+            } };
+            goto cleanup_full;
+        }
+
+        return;
+
+    cleanup_full:
         libusb_close(dev_handle);
+    cleanup_exit:
+        libusb_exit(ctx);
+    cleanup_callback:
         callback(opt_err);
+    }
+
+    void disconnect()
+    {
+        libusb_release_interface(dev_handle, 0);
+        libusb_close(dev_handle);
+        libusb_exit(ctx);
     }
 
 private:
     static const int vid = 0x0483;
     static const int pid = 0x5710;
 
-    libusb_device *periph;
+    libusb_device_handle *dev_handle;
     libusb_context *ctx;
 };
 
