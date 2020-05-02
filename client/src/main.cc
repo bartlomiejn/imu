@@ -8,6 +8,7 @@
 #include <gfx/model.hh>
 #include <gfx/draw_pass.hh>
 #include <gfx/cube.hh>
+#include <peripheral/peripheral.hh>
 
 const unsigned int window_width = 1280;
 const unsigned int window_height = 720;
@@ -225,8 +226,19 @@ main()
 	// Generate cuboid model
 	glm::vec3 pos(0.0f, 0.0f, 0.0f);
 	cuboid = std::make_shared<Model>(&cubemesh, &mtl_shader, &mtl, pos);
+
+	try 
+	{
+		PeripheralDevice device;
+		device.connect([](std::optional<PeripheralDeviceError> err) -> void {
+			if (err.has_value()) throw *err;
+		});
+	}
+	catch (PeripheralDeviceError &exc)
+	{
+		std::cout << "PeripheralDevice error: " << exc.desc << std::endl;
+	}
 	
-	// Main loop
 	while (!glfwWindowShouldClose(window)) 
 	{
 		float current_frame = glfwGetTime();

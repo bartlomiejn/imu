@@ -29,6 +29,7 @@ set(SOURCES
         src/gfx/texture.cc
         src/gfx/image.cc
         src/utils/fileloader.cc
+        src/peripheral/peripheral.cc
         src/main.cc)
 
 add_executable(imuclient ${SOURCES})
