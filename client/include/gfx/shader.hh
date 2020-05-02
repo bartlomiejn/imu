@@ -8,7 +8,7 @@
 class Shader
 {
 public:
-	unsigned int id; ///< Internal ID of the shader
+	unsigned int id;
 
 	/// Initializes a Shader instance.
 	Shader(const char* vert_filename, const char* frag_filename);
@@ -39,6 +39,7 @@ public:
 	/// \param uniform
 	/// \return
 	unsigned int get_uniform_location(const char *uniform) const;
+
 private:
 	const char *vert_filename; ///< Vertex shader filename.
 	const char *frag_filename; ///< Fragment shader filename.
