@@ -120,3 +120,17 @@ Shader::get_uniform_location(const char *uniform) const
 {
 	return glGetUniformLocation(id, uniform);
 }
+
+MaterialShader::MaterialShader(const char* vert_filename):
+	Shader(vert_filename, "glsl/material.glsl")
+{};
+
+void
+MaterialShader::set_dir_light(DirectionalLight& light)
+{
+	set_uniform("dir_light.direction", light.direction);
+	set_uniform("dir_light.ambient", light.ambient);
+	set_uniform("dir_light.diffuse", light.diffuse);
+	set_uniform("dir_light.specular", light.specular);
+	set_uniform("is_dir_light", 1);
+}

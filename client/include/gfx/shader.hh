@@ -2,6 +2,7 @@
 #define IMU_SHADER_HH
 
 #include <glm/glm.hpp>
+#include <gfx/light.hh>
 
 /// Class representing an OpenGL program which combines a vertex and fragment
 /// shader.
@@ -43,6 +44,13 @@ public:
 private:
 	const char *vert_filename; ///< Vertex shader filename.
 	const char *frag_filename; ///< Fragment shader filename.
+};
+
+class MaterialShader: public Shader
+{
+public:
+	explicit MaterialShader(const char* vert_filename);
+	void set_dir_light(DirectionalLight& light);
 };
 
 class ShaderCompileFailure {};

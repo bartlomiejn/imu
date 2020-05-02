@@ -17,8 +17,15 @@ add_subdirectory(lib/glfw)
 add_subdirectory(lib/glm)
 
 set(SOURCES
-        contrib/glad/src/glad.c
+        lib/glad/src/glad.c
+        src/gfx/camera.cc
+        src/gfx/cube.cc
+        src/gfx/framebuffer.cc
+        src/gfx/mesh.cc
+        src/gfx/model.cc
         src/gfx/shader.cc
+        src/gfx/texture.cc
+        src/gfx/image.cc
         src/utils/fileloader.cc
         src/main.cc)
 
@@ -27,7 +34,8 @@ add_dependencies(imuclient glfw glm)
 target_include_directories(imuclient PUBLIC
         lib/glfw/include
         lib/glm
-        contrib/glad/include
+        lib/glad/include
+        lib/
         contrib
         include)
 target_link_libraries(imuclient glfw OpenGL::GL)
