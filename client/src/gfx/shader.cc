@@ -1,9 +1,9 @@
 #include <iostream>
-#include <graphics/shader.h>
-#include <file_loader.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <gfx/shader.hh>
+#include <utils/file_loader.hh>
 
 bool
 is_compile_success(unsigned int shader_id)

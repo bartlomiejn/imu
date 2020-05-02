@@ -1,7 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-
 #include <gfx/shader.hh>
 
 const unsigned int window_width = 1280;

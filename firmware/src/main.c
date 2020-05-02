@@ -10,7 +10,6 @@ PressCount = 0;
 USBD_HandleTypeDef USBD_Device;
 
 static void SystemClock_Config(void);
-static void Demo(void);
 
 int main(void)
 {
@@ -37,24 +36,23 @@ int main(void)
 	BSP_LED_Init(LED6);
 	
 	SystemClock_Config();
-	
-	/* Init USB Device Library */
+
 	USBD_Init(&USBD_Device, &HID_Desc, 0);
-	
-	/* Register the USB HID class */
 	USBD_RegisterClass(&USBD_Device, &USBD_HID);
-	
-	/* Start Device Process */
 	USBD_Start(&USBD_Device);
 	
 	HAL_Delay(1000);
 	
-	if (BSP_PB_GetState(BUTTON_USER) == KEY_PRESSED) {
-		while (BSP_PB_GetState(BUTTON_USER) != KEY_NOT_PRESSED) {}
-		USB_Test();
+	for (;;) 
+	{
+		int16_t accelbuf[3] = { 0 };
+		int16_t gyrobuf[3] = { 0 };
+
+		BSP_ACCELERO_GetXYZ(accelbuf);
+		BSP_GYRO_GetXYZ(gyrobuf);
+
+		USB_Demo(); 
 	}
-	
-	while (1) { Demo(); }
 }
 
 static void cycle_leds()
@@ -86,45 +84,6 @@ static void reset_leds()
 	BSP_LED_Off(LED10);
 	BSP_LED_Off(LED8);
 	BSP_LED_Off(LED6);
-}
-
-static void Demo(void)
-{
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_PRESSED) { cycle_leds(); }
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_NOT_PRESSED) {}
-	
-	if (BSP_GYRO_Init() != HAL_OK) { Error_Handler(); }
-	
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_PRESSED) {
-		/* Move discovery kit to detect negative and positive
-		 * acceleration values in X, Y axis for MEMS GYROSCOPE */
-		GYRO_MEMS_Test();
-	}
-	
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_NOT_PRESSED) {}
-	
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_PRESSED) { cycle_leds(); }
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_NOT_PRESSED) {}
-	
-	if (BSP_ACCELERO_Init() != HAL_OK) { Error_Handler(); }
-	
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_PRESSED) {
-		/* Move discovery kit to detect negative and positive
-		 * acceleration values on X, Y and Z axis for ACCELERATOR MEMS*/
-		ACCELERO_MEMS_Test();
-	}
-	
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_NOT_PRESSED) {}
-	
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_PRESSED) { cycle_leds(); }
-	reset_leds();
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_NOT_PRESSED) {}
-	
-	if (BSP_GYRO_Init() != HAL_OK) { Error_Handler(); }
-	
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_PRESSED) { USB_Demo(); }
-	
-	while (BSP_PB_GetState(BUTTON_USER) != KEY_NOT_PRESSED) {}
 }
 
 /**

@@ -63,7 +63,7 @@ int16_t ThresholdLow = -1000;
 /* Private function prototypes -----------------------------------------------*/
 static void USB_GetPointerData_Test(uint8_t *pbuf);
 static void USB_GetPointerData_Demo(uint8_t *pbuf);
-static void Demo_GyroReadAngRate (float* pfData);
+static void Demo_GyroReadAngRate(float* pfData);
 /* Private functions ---------------------------------------------------------*/
 
 /**
