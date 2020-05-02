@@ -12,7 +12,7 @@
 const unsigned int window_width = 1280;
 const unsigned int window_height = 720;
 
-glm::vec3 camerapos = glm::vec3(-14.0f, 6.0f, 0.0f);
+glm::vec3 camerapos = glm::vec3(-2.0f, 0.2f, 0.0f);
 glm::vec3 lightdir = glm::vec3(8.0f, -20.0f, 4.0f);
 
 Camera camera(
@@ -30,15 +30,15 @@ DirectionalLight dirlight(
 	glm::vec3(1.0f, 1.0f, 1.0f));	// Specular
 
 float shininess = 128.0f;
-Image diff("assets/diff.jpg");
-Image spec("assets/spec.jpg");
+Image diff("assets/diff.jpeg");
+Image spec("assets/spec.jpeg");
 Texture difftex(&diff, layout_rgb, filter_linear);
 Texture spectex(&spec, layout_rgb, filter_linear);
 Material mtl(&difftex, &spectex, shininess);
 
-MaterialShader mtl_shader("assets/vertex.glsl", "assets/frag.glsl");
+MaterialShader mtl_shader;
 
-Cube cubemesh(1.0f, 1.0f, 1.0f);
+Cube cubemesh(1.0f, 0.2f, 1.5f);
 std::shared_ptr<Model> cube;
 
 DrawRenderPass draw_pass(
@@ -75,15 +75,15 @@ on_mouse_movement(GLFWwindow *window, double x_pos, double y_pos)
 		mouse_last_y = y_pos;
 		first_call = false;
 	}
+
+	float x_offset = x_pos - mouse_last_x;
+	float y_offset = mouse_last_y - y_pos;
+
+	mouse_last_x = x_pos;
+	mouse_last_y = y_pos;
 	
 	if (mouse_is_left_pressed)
 	{
-		float x_offset = x_pos - mouse_last_x;
-		float y_offset = mouse_last_y - y_pos;
-
-		mouse_last_x = x_pos;
-		mouse_last_y = y_pos;
-		
 		x_offset *= mouse_sensitivity;
 		y_offset *= mouse_sensitivity;
 		
@@ -99,6 +99,13 @@ on_mouse_event(GLFWwindow* window, int button, int action, int mods)
 	if (action == GLFW_PRESS)
 	{
 		mouse_is_left_pressed = true;
+
+		double x_pos, y_pos;
+		glfwGetCursorPos(window, &x_pos, &y_pos);
+
+		mouse_last_x = x_pos;
+		mouse_last_y = y_pos;
+
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
     else if (action == GLFW_RELEASE)
@@ -144,7 +151,7 @@ main()
 	
 	// Create window and make current
 	GLFWwindow* window = glfwCreateWindow(
-		window_width, window_height, "IMU Client", nullptr, nullptr);
+		window_width, window_height, "IMU", nullptr, nullptr);
 	if (window == nullptr)
 	{
 		std::cout << "Failed to create GLFW window." << std::endl;

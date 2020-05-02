@@ -118,7 +118,7 @@ Shader::get_uniform_location(const char *uniform) const
 }
 
 MaterialShader::MaterialShader() : 
-	Shader("assets/vert.glsl", "assets/frag.glsl")
+	Shader("assets/vertex.glsl", "assets/frag.glsl")
 {};
 
 void
