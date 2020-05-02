@@ -19,7 +19,6 @@ public:
 	DirectionalLight &light;
 	MaterialShader &shader;
 	Camera &camera;
-	DepthRenderPass &depth_pass;
 	unsigned int width;
 	unsigned int height;
 	float near_plane = 0.1f;
@@ -29,14 +28,12 @@ public:
 		DirectionalLight &light,
 		MaterialShader &shader,
 		Camera &camera,
-		DepthRenderPass &depth_pass,
 		unsigned int width,
 		unsigned int height
 	) :
 		light(light),
 		shader(shader),
 		camera(camera),
-		depth_pass(depth_pass),
 		width(width),
 		height(height)
 	{}
@@ -66,19 +63,16 @@ public:
 		glm::mat4 projection = glm::perspective(
 			glm::radians(camera.fov()),
 			(float)width / (float)height,
-			0.1f,
-			255.0f);
+			near_plane,
+			far_plane);
 		
 		DrawObjectsContext ctx(
 			view,
 			projection,
-			depth_pass.light_view_projection(),
 			camera.position(),
 			light,
 			0,
-			1,
-			2,
-			depth_pass.depth_texture());
+			1);
 		
 		for (const auto &model : models)
 			model->draw(ctx);
