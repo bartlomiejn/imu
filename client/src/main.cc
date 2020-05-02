@@ -3,11 +3,27 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <gfx/shader.hh>
+#include <gfx/camera.hh>
 
 const unsigned int window_width = 1280;
 const unsigned int window_height = 720;
 
-/// Resizes the viewport to match current window size.
+Camera camera(
+	glm::vec3(-14.0f, 6.0f, 0.0f),
+	glm::vec3(0.0f, 1.0f, 0.0f), 	// World up vector
+	0.0f, 							// Yaw
+	0.0f, 							// Pitch
+	45.0f); 						// FOV
+
+glm::vec3 lightdir = glm::vec3(8.0f, -20.0f, 4.0f);
+
+DirectionalLight dirlight(
+	camera.position(), 				// Look At point
+	lightdir,	     				// Reversed direction vector
+	glm::vec3(0.2f, 0.2f, 0.2f), 	// Ambient
+	glm::vec3(0.5f, 0.5f, 0.5f), 	// Diffuse
+	glm::vec3(1.0f, 1.0f, 1.0f));	// Specular)
+
 void
 on_framebuffer_resize(GLFWwindow *window, int width, int height)
 {
