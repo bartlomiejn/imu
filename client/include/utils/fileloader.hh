@@ -1,16 +1,15 @@
-FileLoader::FileLoader(std::string &&name)
-{
-	filename = std::move(name);
-}
+#ifndef IMU_FILE_LOADER_H
+#define IMU_FILE_LOADER_H
 
-std::string
-FileLoader::read()
+#include <string>
+
+class FileLoader
 {
-	std::ifstream stream(filename);
-	if (!stream)
-		throw errno;
-	std::string string(
-		(std::istreambuf_iterator<char>(stream)),
-		std::istreambuf_iterator<char>());
-	return string;
-}
+public:
+	explicit FileLoader(std::string &&name);
+	std::string read();
+private:
+	std::string filename;
+};
+
+#endif 

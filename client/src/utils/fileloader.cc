@@ -1,14 +1,14 @@
-#include <utils/loader.hh>
+#include <utils/fileloader.hh>
 #include <fstream>
 
 FileLoader::FileLoader(std::string &&filename)
 {
-	m_filename = std::move(filename);
+	this->filename = std::move(filename);
 }
 
 std::string FileLoader::read()
 {
-	std::ifstream stream(m_filename);
+	std::ifstream stream(filename);
 	if (!stream)
 		throw errno;
 	std::string string(

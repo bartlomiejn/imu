@@ -39,7 +39,7 @@ link_libraries(${GLFW_BINARY_DIR}/lib/libglfw.3.dylib)
 set(SOURCES
         contrib/glad/src/glad.c
         src/gfx/shader.cc
-        src/utils/loader.cc
+        src/utils/fileloader.cc
         src/main.cc)
 
 add_executable(imuclient ${SOURCES})

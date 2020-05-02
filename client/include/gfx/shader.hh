@@ -44,4 +44,7 @@ private:
 	const char *frag_filename; ///< Fragment shader filename.
 };
 
+class ShaderCompileFailure {};
+class ShaderLinkFailure {};
+
 #endif //IMU_SHADER_HH
