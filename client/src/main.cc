@@ -48,7 +48,11 @@ int main()
 	
 	on_framebuffer_resize(nullptr, window_width, window_height);
 	
-	while (!glfwWindowShouldClose(window)) {}
+	while (!glfwWindowShouldClose(window)) 
+	{
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
 	
 	glfwTerminate();
 	
