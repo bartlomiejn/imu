@@ -39,7 +39,7 @@ Material mtl(&difftex, &spectex, shininess);
 MaterialShader mtl_shader;
 
 Cube cubemesh(1.0f, 0.2f, 1.5f);
-std::shared_ptr<Model> cube;
+std::shared_ptr<Model> cuboid;
 
 DrawRenderPass draw_pass(
 	dirlight,
@@ -137,6 +137,13 @@ update_dirlight()
 	dirlight.look_at = camera.position();
 }
 
+void
+update_cuboid_pos()
+{
+	// Stub for board input
+	cuboid->translation = glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
 int 
 main()
 {
@@ -215,9 +222,9 @@ main()
 		return -1;
 	}
 
-	// Generate cube model
+	// Generate cuboid model
 	glm::vec3 pos(0.0f, 0.0f, 0.0f);
-	cube = std::make_shared<Model>(&cubemesh, &mtl_shader, &mtl, pos);
+	cuboid = std::make_shared<Model>(&cubemesh, &mtl_shader, &mtl, pos);
 	
 	// Main loop
 	while (!glfwWindowShouldClose(window)) 
@@ -228,8 +235,9 @@ main()
 
 		handle_keyboard_input(window);
 		update_dirlight();
+		update_cuboid_pos();
 
-		draw_pass.draw(cube);
+		draw_pass.draw(cuboid);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
