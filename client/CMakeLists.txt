@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.15)
 project(imuclient)
 
 set(CMAKE_CXX_STANDARD 17)
-
 set(BUILD_SHARED_LIBS ON)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -39,3 +38,5 @@ target_include_directories(imuclient PUBLIC
         contrib
         include)
 target_link_libraries(imuclient glfw OpenGL::GL)
+
+file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
