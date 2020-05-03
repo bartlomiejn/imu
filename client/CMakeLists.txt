@@ -14,6 +14,7 @@ set(GLM_TEST_ENABLE_CXX_17 ON)
 
 find_package(OpenGL REQUIRED)
 find_package(LibUSB REQUIRED)
+find_package(HIDAPI REQUIRED)
 
 add_subdirectory(lib/glfw)
 add_subdirectory(lib/glm)
@@ -29,19 +30,24 @@ set(SOURCES
         src/gfx/texture.cc
         src/gfx/image.cc
         src/utils/fileloader.cc
-        src/peripheral/peripheral.cc
+        src/usb/usbservice.cc
         src/main.cc)
 
 add_executable(imuclient ${SOURCES})
 add_dependencies(imuclient glfw glm)
 target_include_directories(imuclient PRIVATE
         ${LIBUSB_INCLUDE_DIR}
+        ${HIDAPI_INCLUDE_DIRS}
         lib/glfw/include
         lib/glm
         lib/glad/include
         lib/
         contrib
         include)
-target_link_libraries(imuclient glfw OpenGL::GL ${LIBUSB_LIBRARIES})
+target_link_libraries(imuclient 
+        glfw 
+        OpenGL::GL 
+        ${LIBUSB_LIBRARIES} 
+        ${HIDAPI_LIBRARIES})
 
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})

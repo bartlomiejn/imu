@@ -6,9 +6,9 @@
 #include <optional>
 #include <libusb.h>
 
-struct PeripheralDeviceError : public std::exception 
+struct USBServiceError : public std::exception 
 {
-    PeripheralDeviceError(std::string desc) : desc(desc) {};
+    USBServiceError(std::string desc) : desc(desc) {};
 
     std::string desc;
 
@@ -18,26 +18,26 @@ struct PeripheralDeviceError : public std::exception
     }
 };
 
-class PeripheralDevice
+class USBService
 {
 public:
-    PeripheralDevice() {};
+    USBService() {};
 
-    ~PeripheralDevice()
+    ~USBService()
     {
         libusb_exit(ctx);
     };
 
     void connect(
-        std::function<void(std::optional<PeripheralDeviceError>)> callback
+        std::function<void(std::optional<USBServiceError>)> callback
     ){
-        std::optional<PeripheralDeviceError> opt_err = std::nullopt;
+        std::optional<USBServiceError> opt_err = std::nullopt;
         int err;
 
         err = libusb_init(&ctx);
         if (err < 0) 
         {
-            opt_err = PeripheralDeviceError { 
+            opt_err = USBServiceError { 
                 "Couldn't init USB with error code" + std::to_string(err) 
             };
             goto cleanup_callback;
@@ -50,7 +50,7 @@ public:
         if (!dev_handle)
         {
             opt_err = { 
-                PeripheralDeviceError { "Peripheral device is not attached. " } 
+                USBServiceError { "Peripheral device is not attached. " } 
             };
             goto cleanup_exit;
         }
@@ -61,7 +61,7 @@ public:
             err = libusb_detach_kernel_driver(dev_handle, 0);
             if (err)
             {
-                opt_err = { PeripheralDeviceError {
+                opt_err = { USBServiceError {
                     "Couldn't detach kernel driver with error code " 
                     + std::to_string(err)
                 } };
@@ -76,7 +76,7 @@ public:
         err = libusb_claim_interface(dev_handle, 0);
         if (err)
         {
-            opt_err = { PeripheralDeviceError {
+            opt_err = { USBServiceError {
                 "Couldn't claim interface with error code " 
                 + std::to_string(err)
             } };

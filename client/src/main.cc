@@ -8,7 +8,7 @@
 #include <gfx/model.hh>
 #include <gfx/draw_pass.hh>
 #include <gfx/cube.hh>
-#include <peripheral/peripheral.hh>
+#include <usb/usbservice.hh>
 
 const unsigned int window_width = 1280;
 const unsigned int window_height = 720;
@@ -229,14 +229,14 @@ main()
 
 	try 
 	{
-		PeripheralDevice device;
-		device.connect([](std::optional<PeripheralDeviceError> err) -> void {
+		USBService usb;
+		usb.connect([](std::optional<USBServiceError> err) -> void {
 			if (err.has_value()) throw *err;
 		});
 	}
-	catch (PeripheralDeviceError &exc)
+	catch (USBServiceError &exc)
 	{
-		std::cout << "PeripheralDevice error: " << exc.desc << std::endl;
+		std::cout << "USBService error: " << exc.desc << std::endl;
 	}
 	
 	while (!glfwWindowShouldClose(window)) 
