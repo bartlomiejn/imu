@@ -4,7 +4,7 @@
 #include <iostream>
 #include <functional>
 #include <optional>
-#include <libusb.h>
+#include <hidapi.h>
 
 struct USBServiceError : public std::exception 
 {
@@ -21,91 +21,76 @@ struct USBServiceError : public std::exception
 class USBService
 {
 public:
-    USBService() {};
+    USBService() 
+    {
+        
+    };
 
     ~USBService()
     {
-        libusb_exit(ctx);
+        hid_exit();
     };
 
     void connect(
         std::function<void(std::optional<USBServiceError>)> callback
     ){
         std::optional<USBServiceError> opt_err = std::nullopt;
+        wchar_t wstr[256];
+        unsigned char in[64];
         int err;
 
-        err = libusb_init(&ctx);
+        err = hid_init();
         if (err < 0) 
         {
             opt_err = USBServiceError { 
-                "Couldn't init USB with error code" + std::to_string(err) 
-            };
-            goto cleanup_callback;
-        }
-
-        libusb_set_option(
-            ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING);
-
-        dev_handle = libusb_open_device_with_vid_pid(ctx, vid, pid);
-        if (!dev_handle)
-        {
-            opt_err = { 
-                USBServiceError { "Peripheral device is not attached. " } 
+                "Couldn't init HIDAPI with error code" + std::to_string(err) 
             };
             goto cleanup_exit;
         }
 
-        if (libusb_kernel_driver_active(dev_handle, 0))
+        handle = hid_open(vid, pid, nullptr);
+        if (handle == nullptr)
         {
-            std::cout << "kernel driver active, trying detach" << std::endl;
-            err = libusb_detach_kernel_driver(dev_handle, 0);
-            if (err)
-            {
-                opt_err = { USBServiceError {
-                    "Couldn't detach kernel driver with error code " 
-                    + std::to_string(err)
-                } };
-                goto cleanup_full;
-            }
-
-            std::cout << "detach successful" << std::endl;
+            opt_err = USBServiceError { "Couldn't open the HID device." };
+            goto cleanup_exit;
         }
 
-        std::cout << "kernel driver inactive" << std::endl;
+        err = hid_get_manufacturer_string(handle, wstr, MAX_STR);
+        std::cout << "Manufacturer: " << wstr << std::endl;
 
-        err = libusb_claim_interface(dev_handle, 0);
-        if (err)
-        {
-            opt_err = { USBServiceError {
-                "Couldn't claim interface with error code " 
-                + std::to_string(err)
-            } };
-            goto cleanup_full;
-        }
+        err = hid_get_product_string(handle, wstr, MAX_STR);
+        std::cout << "Product: " << wstr << std::endl;
+
+        err = hid_get_serial_number_string(handle, wstr, MAX_STR);
+        std::cout << "SN: " << wstr << std::endl;
+
+        err = hid_get_indexed_string(handle, 1, wstr, MAX_STR);
+        std::cout << "Indexed string 1: " << wstr << std::endl;
+
+        err = hid_read(handle, in, 64);
+
+        std::cout << "HID read buffer: " << in << std::endl;
+
+        err = hid_exit();
 
         return;
 
-    cleanup_full:
-        libusb_close(dev_handle);
     cleanup_exit:
-        libusb_exit(ctx);
+        hid_exit();
     cleanup_callback:
         callback(opt_err);
     }
 
     void disconnect()
     {
-        libusb_release_interface(dev_handle, 0);
-        libusb_close(dev_handle);
-        libusb_exit(ctx);
+        hid_exit();
     }
 
 private:
     static const int vid = 0x0483;
     static const int pid = 0x5710;
 
-    libusb_device_handle *dev_handle;
-    libusb_context *ctx;
+    hid_device* handle;
 };
 
 #endif
