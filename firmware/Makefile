@@ -31,9 +31,7 @@ GCC_OPTS := \
 	-Os \
 	-mcpu=cortex-m4 -march=armv7e-m \
 	-mfloat-abi=hard -mfpu=fpv4-sp-d16 \
-	-ffreestanding \
-	--specs=nosys.specs -lnosys \
-	-fno-asynchronous-unwind-tables \
+	-ffreestanding --specs=nosys.specs -lnosys \
 	-T $(SRC_DIR)/startup/stm32f303xc.ld
 
 ifeq ($(PROFILE),debug)
