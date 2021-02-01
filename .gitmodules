@@ -7,3 +7,7 @@
 [submodule "client/lib/libusb"]
 	path = client/lib/libusb
 	url = git://github.com/libusb/libusb.git
+[submodule "external/FreeRTOS"]
+	path = external/FreeRTOS
+	url = git@github.com:FreeRTOS/FreeRTOS.git
+	branch = e74a3a4c243f0ac07b05c4df92ed33d9cb15b083
