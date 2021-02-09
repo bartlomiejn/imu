@@ -2,6 +2,7 @@ PROFILE ?= debug
 OPENOCD_PORT ?= 3333
 
 UNAME_S := $(shell uname -s)
+
 ifeq ($(UNAME_S),Linux)
 TARGET_PLAT := arm-eabi
 endif
@@ -13,6 +14,7 @@ ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 TOOLS_DIR := $(ROOT_DIR)/tools
 OUTPUT_DIR := $(ROOT_DIR)/output
 INCLUDE_DIR := $(ROOT_DIR)/include
+RTOS_DIR := $(ROOT_DIR)/freertos
 SRC_DIR := $(ROOT_DIR)/src
 OPENOCD_DIR := $(TOOLS_DIR)/openocd
 TARGET_GCC_DIR := $(TOOLS_DIR)/$(TARGET_PLAT)
@@ -41,6 +43,9 @@ endif
 ST_INCLUDE_DIR := $(INCLUDE_DIR)/st
 STM32_USB_LIB_DIR := $(ST_INCLUDE_DIR)/STM32_USB_Device_Library
 BSP_LIB_DIR := $(ST_INCLUDE_DIR)/BSP
+RTOS_INCLUDE_DIR := $(RTOS_DIR)/include
+RTOS_SRC_PORT_DIR := $(RTOS_SRC_DIR)/GCC/ARM_CM4_MPU
+
 STM32_USB_INCLUDE := $(STM32_USB_LIB_DIR)/Core/Inc
 STM32_USB_HID_INCLUDE := $(STM32_USB_LIB_DIR)/Class/HID/Inc
 CMSIS_STM32F3_INCLUDE := $(ST_INCLUDE_DIR)/CMSIS/Device/ST/STM32F3xx/Include
@@ -59,6 +64,8 @@ GCC_INCLUDES := \
 	-I$(CMSIS_INCLUDE) \
 	-I$(CMSIS_STM32F3_INCLUDE) \
 	-I$(HAL_INCLUDE) \
+	-I$(RTOS_INCLUDE_DIR) \
+	-I$(RTOS_SRC_PORT_DIR) \
 	$(addprefix -I, $(BSP_INCLUDE))
 
 ST_SRC_DIR := $(SRC_DIR)/st
@@ -66,6 +73,8 @@ STM32_USB_DIR := $(ST_SRC_DIR)/STM32_USB_Device_Library
 CMSIS_SRC_DIR := $(ST_SRC_DIR)/CMSIS
 HAL_SRC_DIR := $(ST_SRC_DIR)/STM32F3xx_HAL_Driver
 BSP_SRC_DIR := $(ST_SRC_DIR)/BSP
+RTOS_SRC_DIR := $(RTOS_SRC_DIR)/src
+
 ST_SOURCES := \
 	$(SRC_DIR)/selftest.c \
 	$(SRC_DIR)/stm32f3xx_it.c \
@@ -83,22 +92,29 @@ BSP_SOURCES := \
 	$(BSP_SRC_DIR)/stm32f3_discovery.c \
 	$(BSP_SRC_DIR)/stm32f3_discovery_accelerometer.c \
 	$(BSP_SRC_DIR)/stm32f3_discovery_gyroscope.c
+RTOS_SOURCES := \
+	$(RTOS_SRC_PORT_DIR)/port.c \
+	$(RTOS_SRC_DIR)/event_groups.c \
+	$(RTOS_SRC_DIR)/list.c \
+	$(RTOS_SRC_DIR)/queue.c \
+	$(RTOS_SRC_DIR)/stream_buffer.c \
+	$(RTOS_SRC_DIR)/tasks.c \
+	$(RTOS_SRC_DIR)/timers.c
 SOURCES := \
 	$(SRC_DIR)/startup/stm32f303xc.s \
 	$(SRC_DIR)/main.c
+
 GCC_SOURCES := \
 	$(STM32_USB_SOURCES) \
 	$(STM32_USB_HID_SOURCES) \
 	$(HAL_SOURCES) \
 	$(BSP_SOURCES) \
 	$(ST_SOURCES) \
+	$(RTOS_SOURCES) \
 	$(SOURCES)
 
-export UNAME_S TARGET_PLAT 
-export ROOT_DIR TOOLS_DIR
-export OPENOCD_PORT OPENOCD_DIR
-export TARGET_GCC_DIR TARGET_GDB
-export OUTPUT_BIN
+export UNAME_S TARGET_PLAT ROOT_DIR TOOLS_DIR OPENOCD_PORT OPENOCD_DIR
+export TARGET_GCC_DIR TARGET_GDB OUTPUT_BIN
 
 $(OUTPUT_DIR):
 	mkdir -pv $@
