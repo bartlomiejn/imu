@@ -44,7 +44,9 @@ ST_INCLUDE_DIR := $(INCLUDE_DIR)/st
 STM32_USB_LIB_DIR := $(ST_INCLUDE_DIR)/STM32_USB_Device_Library
 BSP_LIB_DIR := $(ST_INCLUDE_DIR)/BSP
 RTOS_INCLUDE_DIR := $(RTOS_DIR)/include
+RTOS_SRC_DIR := $(ROOT_DIR)/freertos/src
 RTOS_SRC_PORT_DIR := $(RTOS_SRC_DIR)/GCC/ARM_CM4_MPU
+RTOS_SRC_MEMMANG_DIR := $(RTOS_SRC_DIR)/MemMang
 
 STM32_USB_INCLUDE := $(STM32_USB_LIB_DIR)/Core/Inc
 STM32_USB_HID_INCLUDE := $(STM32_USB_LIB_DIR)/Class/HID/Inc
@@ -73,7 +75,6 @@ STM32_USB_DIR := $(ST_SRC_DIR)/STM32_USB_Device_Library
 CMSIS_SRC_DIR := $(ST_SRC_DIR)/CMSIS
 HAL_SRC_DIR := $(ST_SRC_DIR)/STM32F3xx_HAL_Driver
 BSP_SRC_DIR := $(ST_SRC_DIR)/BSP
-RTOS_SRC_DIR := $(RTOS_SRC_DIR)/src
 
 ST_SOURCES := \
 	$(SRC_DIR)/selftest.c \
@@ -93,6 +94,8 @@ BSP_SOURCES := \
 	$(BSP_SRC_DIR)/stm32f3_discovery_accelerometer.c \
 	$(BSP_SRC_DIR)/stm32f3_discovery_gyroscope.c
 RTOS_SOURCES := \
+	$(RTOS_SRC_MEMMANG_DIR)/heap_4.c \
+	$(RTOS_SRC_PORT_DIR)/mpu_wrappers.c \
 	$(RTOS_SRC_PORT_DIR)/port.c \
 	$(RTOS_SRC_DIR)/event_groups.c \
 	$(RTOS_SRC_DIR)/list.c \
